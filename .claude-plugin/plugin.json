@@ -6,7 +6,7 @@
     "name": "Kas",
     "url": "https://github.com/brkastner"
   },
-  "repository": "https://github.com/brkastner/kas-cc-plugins",
+  "repository": "https://github.com/brkastner/kas-claude-plugin",
   "license": "MIT",
   "keywords": ["workflow", "beads", "session", "code-review", "planning"]
 }
