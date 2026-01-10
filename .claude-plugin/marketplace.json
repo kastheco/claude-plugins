@@ -7,9 +7,10 @@
   "plugins": [
     {
       "name": "kas",
-      "source": ".",
       "description": "Workflow automation with beads, sessions, and code review",
-      "version": "1.0.0"
+      "version": "1.4.1",
+      "source": "./",
+      "category": "productivity"
     }
   ]
 }
