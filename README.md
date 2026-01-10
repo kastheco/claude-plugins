@@ -4,10 +4,11 @@ Workflow automation with beads task tracking, session management, and code revie
 
 ## Features
 
-- **Session Management**: `/kas:done`, `/kas:save`, `/kas:next`, `/kas:merge` commands
-- **Beads Integration**: Automatic daemon startup, issue tracking, work management
-- **Code Review**: Specialized agents for plan review, code review, and reality checking
-- **Browser Automation**: Subagent-based browser testing and scraping
+- **Plan Mode**: Structured planning with review agents before implementation
+- **Beads Integration**: Automatic daemon startup, issue tracking, dependency management
+- **Session Management**: Multi-session workflows with context preservation
+- **Code Review**: Parallel code quality + reality assessment
+- **Browser Automation**: Subagent-based web testing and scraping
 
 ## Prerequisites
 
@@ -38,61 +39,250 @@ git clone https://github.com/brkastner/kas-plugins.git ~/dev/kas-plugins
 claude --plugin-dir ~/dev/kas-plugins
 ```
 
+## Complete Workflow
+
+```
+PLAN MODE
+├─ Write implementation plan
+├─ plan-reviewer (auto) → summarize → user approves
+├─ task-splitter (auto) → outputs bd create commands
+└─ ExitPlanMode → user reviews commands
+       ↓
+USER APPROVAL
+├─ User executes bd create commands
+├─ User: /clear (free context)
+└─ [Next session: paste continuation prompt]
+       ↓
+IMPLEMENTATION (one or more sessions)
+├─ bd ready → pick issue → implement
+├─ /kas:verify (parallel code + reality review)
+├─ Quality gates (tests, linting)
+├─ /kas:save (if continuing later) OR /kas:done (if complete)
+└─ [If /kas:save: /clear → next session]
+       ↓
+FINALIZATION
+├─ /kas:done → commit, push, close issues
+├─ Create PR (if needed)
+└─ /kas:merge → merge to main after PR approval
+```
+
+### Multi-Session Pattern
+
+```
+Session 1: Plan → Review → Create beads → /clear
+Session 2: [Paste prompt] → Implement → /kas:save → /clear
+Session 3: [Paste prompt] → Complete → /kas:done → /kas:merge
+```
+
 ## Commands
 
 | Command | Description |
 |---------|-------------|
-| `/kas:done` | Complete session, push all changes |
-| `/kas:save` | Snapshot session for later continuation |
-| `/kas:next` | Find next available beads issue |
-| `/kas:merge` | Merge PR to main |
-| `/kas:review-code` | Code quality review (Linus Torvalds style) |
-| `/kas:review-reality` | Reality assessment (skeptical validation) |
-| `/kas:verify` | Parallel review + reality, combined verdict |
+| `/kas:done` | Complete session: commit, push, close issues, verify daemon |
+| `/kas:save` | Snapshot session: push work, generate continuation prompt |
+| `/kas:next` | Find next available beads issue to work on |
+| `/kas:merge` | Merge PR to main after CI passes |
+| `/kas:verify` | Run code + reality review in parallel, combine verdicts |
+| `/kas:review-code` | Standalone code quality review (Linus Torvalds style) |
+| `/kas:review-reality` | Standalone reality assessment (skeptical validation) |
+| `/kas:review-plan` | Review plan for security gaps and design issues |
+
+### Session Commands
+
+**`/kas:done`** - Complete and finalize
+- Runs quality gates
+- Closes beads issues
+- Commits and pushes (MANDATORY - work incomplete until push succeeds)
+- Adds PR comment if PR exists
+- Suggests next task
+
+**`/kas:save`** - Pause for later
+- Commits and pushes current work
+- Generates continuation prompt for next session
+- Use `/clear` afterward to free context
+
+**`/kas:next`** - Find work
+- Shows unassigned beads issues ready to work
+- Recommends which to claim
+
+### Review Commands
+
+**`/kas:verify`** - Comprehensive verification
+- Launches code-reviewer and project-reality-manager in parallel
+- Combines findings with worst-wins logic:
+  - Both pass → VERIFIED
+  - Either has issues → NEEDS CHANGES
+  - Critical gaps → BLOCKED
+
+**`/kas:review-code`** - Code quality only
+- Ruthless Linus Torvalds style review
+- Severity levels: Critical (91-100), High (71-90), Medium (41-70), Low (1-40)
+
+**`/kas:review-reality`** - Reality check only
+- Validates claimed completions with extreme skepticism
+- Gap analysis between claimed and actual functionality
 
 ## Agents
 
-| Agent | Purpose |
-|-------|---------|
-| `task-splitter` | Decompose plans into beads issues |
-| `plan-reviewer` | Review plans for gaps and issues |
-| `code-reviewer` | Ruthless code quality review |
-| `browser-automation` | Web testing and automation |
-| `project-reality-manager` | Validate claimed completions |
+| Agent | Purpose | Trigger |
+|-------|---------|---------|
+| `plan-reviewer` | Review plans for gaps/security | Auto after plan written |
+| `task-splitter` | Decompose plans into beads issues | Auto after plan-reviewer |
+| `code-reviewer` | Ruthless code quality review | Via /kas:review-code or /kas:verify |
+| `project-reality-manager` | Validate claimed completions | Via /kas:review-reality or /kas:verify |
+| `browser-automation` | Web testing and automation | Detected via skill pattern |
 
-## Hooks
+### Agent Workflow
 
-The plugin automatically starts the beads daemon at session start:
+1. **plan-reviewer** runs automatically after you write a plan
+2. Claude summarizes findings → you approve → **task-splitter** runs
+3. task-splitter outputs `bd create` commands (doesn't execute them)
+4. You review commands → approve → execute them yourself
+5. Implementation happens in fresh session after `/clear`
+
+## Critical Rules
+
+These rules are non-negotiable:
+
+1. **Work is NOT complete until `git push` succeeds**
+   - Never stop before pushing
+   - Never say "ready to push when you are" - Claude must push
+
+2. **Summarize findings before proceeding**
+   - After plan-reviewer: summarize → get approval
+   - After code review: summarize → get approval
+   - Never auto-apply fixes
+
+3. **Quality gates must pass**
+   - Run tests before committing
+   - Fix failures before marking complete
+
+4. **Plan mode order matters**
+   - plan-reviewer → approve → task-splitter → ExitPlanMode
+   - Never skip the approval checkpoint
+
+## Beads Integration
+
+### Automatic Setup
+
+The plugin starts the beads daemon automatically on session start:
 ```bash
-bd daemon --status || bd daemon --start --auto-commit --auto-push
+bd daemon --start --auto-commit --auto-push
 ```
+
+This syncs beads data to the `util/beads-sync` branch automatically.
+
+### Key Commands
+
+```bash
+bd ready --unassigned  # Find unclaimed work
+bd show <id>           # View issue details
+bd update <id> --claim # Claim issue (sets assignee + in_progress)
+bd close <id>          # Complete work
+bd daemon --status     # Verify daemon running
+```
+
+### Starting Work
+
+```bash
+bd show <id>                      # Review issue
+bd update <id> --claim            # Claim it
+git checkout -b feat/<id>-slug    # Create branch
+git push -u origin feat/<id>-slug # Push branch
+```
+
+### Issue Categories
+
+- **Explore**: Research, codebase analysis
+- **ADR**: Architecture decisions, design spikes
+- **Implement**: Code changes, features
+- **Document**: Patterns, guides, API docs
+- **Fix**: Bug fixes, tech debt
+
+### Sibling Pattern Corrections
+
+Before implementing, check closed sibling issues (same plan/epic) for pattern corrections discovered during implementation.
+
+## Browser Automation
+
+The browser skill delegates web tasks to a subagent, keeping your main context clean.
+
+**Triggers**: Any request involving web interaction, testing, scraping
+
+**How it works**:
+1. Main context detects browser task
+2. Delegates to `browser-automation` agent via Task tool
+3. Subagent uses claude-in-chrome MCP tools
+4. Returns concise summary (no raw HTML/verbose logs)
 
 ## Configuration
 
-### CLAUDE.md Precedence
+### Project CLAUDE.md
 
-When using this plugin with a project that has its own CLAUDE.md:
-- Project CLAUDE.md instructions take precedence
-- Plugin provides base workflow; project adds specifics
+When a project has its own CLAUDE.md:
+- Project instructions take precedence
+- Plugin provides base workflow
+- Project adds specifics (quality gates, conventions)
 
 ### Beads Setup
 
-Each project using this plugin should initialize beads:
+Each project needs beads initialized:
 ```bash
 bd init
 bd daemon --start --auto-commit --auto-push
 ```
 
-## Workflow
+### Branch Naming
 
+- Features: `feat/<id>-<description>`
+- Bug fixes: `fix/<id>-<description>`
+- Refactors: `refactor/<id>-<description>`
+
+### Quality Gates
+
+Customize per project:
+```bash
+# JavaScript/TypeScript
+npm test && npm run lint
+
+# Python
+pytest && ruff check .
+
+# Rust
+cargo test && cargo clippy
+
+# Go
+go test ./... && golangci-lint run
 ```
-Plan Mode → Plan Reviewer → Task Splitter
-    ↓
-bd ready → Pick issue → Implement
-    ↓
-Code Review → Quality Gates → /kas:done
-    ↓
-Create PR → /kas:merge
+
+## Hooks
+
+### SessionStart
+
+Ensures beads daemon is running with auto-sync enabled:
+- Only runs in directories with `.beads/`
+- Silent operation (no warnings)
+- Never fails (always exits 0)
+
+## Troubleshooting
+
+### Git push fails
+```bash
+git pull --rebase
+# Resolve conflicts if any
+git push
+```
+
+### Daemon not running
+```bash
+bd daemon --status
+bd daemon --start --auto-commit --auto-push
+```
+
+### Worktree cleanup
+```bash
+git worktree list
+git worktree remove <path>
 ```
 
 ## License
