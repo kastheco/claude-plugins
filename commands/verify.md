@@ -1,10 +1,10 @@
 ---
-description: Comprehensive code verification with parallel review agents
+description: Tiered code verification with early-exit on issues
 ---
 
 # /kas:verify - Verify Implementation
 
-Run all review agents in parallel, combine findings, then run code-simplifier if passing.
+Tiered verification with early-exit. Static analysis first, dynamic checks only if clean.
 
 ## Workflow
 
@@ -17,9 +17,9 @@ git diff --stat
 
 If no changes, report "Nothing to verify" and stop.
 
-### 2. Launch parallel reviews
+### 2. Tier 1: Static Analysis (parallel)
 
-Use the Task tool to launch **six general-purpose agents in parallel** (single message, multiple tool calls):
+Launch **five agents in parallel** using the Task tool:
 
 **Agent 1 - Code Review (kas):**
 ```
@@ -28,17 +28,17 @@ Read agent instructions at /home/kas/dev/kas-plugins/agents/code-reviewer.md
 Return structured findings with severity levels and overall assessment (APPROVED/NEEDS CHANGES/REJECTED)."
 ```
 
-**Agent 2 - Reality Assessment (kas):**
-```
-"Run reality assessment on the current git changes.
-Read agent instructions at /home/kas/dev/kas-plugins/agents/project-reality-manager.md
-Return gap analysis and functional state assessment."
-```
-
-**Agent 3 - Silent Failure Hunter (pr-review-toolkit):**
+**Agent 2 - Silent Failure Hunter (pr-review-toolkit):**
 ```
 "Check for silent failures in error handling.
 Look for: empty catch blocks, swallowed exceptions, missing error propagation, try/catch without proper handling.
+Return findings with severity levels."
+```
+
+**Agent 3 - Type Design Analyzer (pr-review-toolkit):**
+```
+"Review type definitions, interfaces, and schemas in the changes.
+Check for: overly permissive types, missing null checks, inconsistent naming, type safety issues.
 Return findings with severity levels."
 ```
 
@@ -49,55 +49,45 @@ Check for: outdated comments, missing docs on public APIs, misleading comments, 
 Return findings with severity levels."
 ```
 
-**Agent 5 - Type Design Analyzer (pr-review-toolkit):**
-```
-"Review type definitions, interfaces, and schemas in the changes.
-Check for: overly permissive types, missing null checks, inconsistent naming, type safety issues.
-Return findings with severity levels."
-```
-
-**Agent 6 - Test Analyzer (pr-review-toolkit):**
+**Agent 5 - Test Analyzer (pr-review-toolkit):**
 ```
 "Analyze test coverage for the changes.
 Check for: missing tests, inadequate assertions, untested edge cases, test quality.
 Return findings with coverage assessment."
 ```
 
-### 3. Combine findings
+**Tier 1 Exit Conditions:**
 
-After all agents return, merge results into categories:
+| Condition | Verdict | Action |
+|-----------|---------|--------|
+| Any critical/high issues | BLOCKED | Stop, present findings |
+| Any medium issues | NEEDS CHANGES | Stop, present findings |
+| All clean | Continue | Proceed to Tier 2 |
 
-**Code Quality** (code-reviewer + silent-failure-hunter):
-- Critical/High/Medium/Low issues
-- Error handling gaps
+If Tier 1 fails, do NOT proceed to Tier 2. Present combined findings and ask for direction.
 
-**Documentation** (comment-analyzer):
-- Comment quality issues
-- Missing documentation
+### 3. Tier 2: Dynamic Assessment (only if Tier 1 clean)
 
-**Type Safety** (type-design-analyzer):
-- Type design issues
-- Schema problems
+Launch **one agent**:
 
-**Test Coverage** (test-analyzer):
-- Coverage gaps
-- Test quality issues
+**Agent 6 - Reality Assessment (kas):**
+```
+"Run reality assessment on the current git changes.
+Read agent instructions at /home/kas/dev/kas-plugins/agents/project-reality-manager.md
+Return gap analysis and functional state assessment."
+```
 
-**Reality Assessment** (project-reality-manager):
-- Functional state
-- Gap analysis
+**Tier 2 Exit Conditions:**
 
-**Overall Verdict** using worst-wins logic:
+| Condition | Verdict | Action |
+|-----------|---------|--------|
+| Gaps or issues found | NEEDS CHANGES | Stop, present findings |
+| Severe gaps | BLOCKED | Stop, present findings |
+| Clean | VERIFIED | Proceed to Tier 3 |
 
-| Condition | Verdict |
-|-----------|---------|
-| All agents pass, no critical/high issues | VERIFIED |
-| Any agent has medium issues only | NEEDS CHANGES |
-| Any agent has critical/high issues | BLOCKED |
+### 4. Tier 3: Polish (only if VERIFIED)
 
-### 4. If VERIFIED: Run code-simplifier
-
-Only if verdict is VERIFIED, launch one more agent:
+Launch **one agent**:
 
 **Agent 7 - Code Simplifier (pr-review-toolkit):**
 ```
@@ -106,21 +96,23 @@ Look for: over-engineering, unnecessary abstractions, code that could be simpler
 Return suggestions (these are optional improvements, not blockers)."
 ```
 
-Present simplification suggestions separately - these don't change the verdict.
+Simplification suggestions are optional - they don't change the VERIFIED verdict.
 
 ### 5. Present and wait
 
-Summarize combined findings and ask for approval:
-- If VERIFIED: "All checks pass. [Simplification suggestions if any]. Proceed?"
-- If NEEDS CHANGES: "Issues found. Approve fixes?"
-- If BLOCKED: "Critical blockers. How to proceed?"
+Summarize findings based on exit tier:
+
+- **VERIFIED** (reached Tier 3): "All checks pass. [Simplification suggestions if any]. Proceed?"
+- **NEEDS CHANGES** (Tier 1 or 2): "Issues found at [tier]. Approve fixes?"
+- **BLOCKED** (Tier 1 or 2): "Critical blockers at [tier]. How to proceed?"
 
 Do NOT apply fixes automatically.
 
 ## Rules
 
-- All 6 primary agents MUST complete before providing verdict
-- Use worst-wins logic (conservative approach)
-- code-simplifier only runs after VERIFIED verdict
+- Tiers execute sequentially with early-exit
+- Tier 1 agents run in parallel for speed
+- Tier 2 only runs if Tier 1 has zero issues
+- Tier 3 only runs if Tier 2 returns VERIFIED
 - Never apply fixes without user approval
 - Empty diff = exit early, don't launch agents
