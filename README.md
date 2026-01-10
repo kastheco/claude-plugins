@@ -100,6 +100,7 @@ Session 3: [Paste prompt] → Complete → /kas:done → /kas:merge
 
 **`/kas:save`** - Pause for later
 - Commits and pushes current work
+- Adds PR comment with session snapshot (if PR exists)
 - Generates continuation prompt for next session
 - Use `/clear` afterward to free context
 
