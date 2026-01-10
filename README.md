@@ -23,20 +23,20 @@ Install these plugins first:
 
 ```bash
 # Add the marketplace
-/plugin marketplace add brkastner/kas-plugins
+/plugin marketplace add brkastner/kas-cc-plugins
 
 # Install the plugin
-/plugin install kas@kas-plugins
+/plugin install kas@kas-cc-plugins
 ```
 
 ### Option 2: Local Development
 
 ```bash
 # Clone the repo
-git clone https://github.com/brkastner/kas-plugins.git ~/dev/kas-plugins
+git clone https://github.com/brkastner/kas-cc-plugins.git ~/dev/kas-cc-plugins
 
 # Use with Claude Code
-claude --plugin-dir ~/dev/kas-plugins
+claude --plugin-dir ~/dev/kas-cc-plugins
 ```
 
 ## Complete Workflow
