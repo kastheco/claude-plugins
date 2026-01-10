@@ -46,6 +46,9 @@ claude --plugin-dir ~/dev/kas-plugins
 | `/kas:save` | Snapshot session for later continuation |
 | `/kas:next` | Find next available beads issue |
 | `/kas:merge` | Merge PR to main |
+| `/kas:review-code` | Code quality review (Linus Torvalds style) |
+| `/kas:review-reality` | Reality assessment (skeptical validation) |
+| `/kas:verify` | Parallel review + reality, combined verdict |
 
 ## Agents
 

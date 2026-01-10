@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2025-01-09
+
+### Added
+- `/kas:verify` - Orchestrator command that runs code review and reality assessment in parallel
+- `/kas:review-code` - Standalone code quality review (Linus Torvalds style)
+- `/kas:review-reality` - Standalone reality assessment (skeptical validation)
+
+### Changed
+- Commands are now composable: `/kas:verify` uses Task agents to run the standalone commands in parallel
+
 ## [1.1.0] - 2025-01-09
 
 ### Fixed
