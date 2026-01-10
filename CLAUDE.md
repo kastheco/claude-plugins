@@ -38,7 +38,7 @@ Session boundary:
 **Key:** `/kas:done`, `/kas:save`, `/kas:merge`, `/clear` are USER shortcuts, not Claude automation
 
 **User Checkpoints (mandatory):**
-1. After plan-reviewer: summarize findings, get approval before task-splitter
+1. After plan-reviewer + task-splitter: user approves plan, findings, and bd commands together
 2. After code review agents: summarize findings, get approval before fixes
 3. After code-simplifier: summarize suggestions, get approval before applying
 
@@ -51,31 +51,28 @@ Session boundary:
 
 ### Plan Reviewer Agent
 
-After creating a plan, run the plan-reviewer agent:
+After creating a plan, run the plan-reviewer agent automatically:
 ```
 "Review this plan for security gaps and design issues"
 ```
 
-The agent will return structured feedback. **Summarize the findings to me** and get approval before proceeding.
+The agent returns structured feedback. Then immediately run task-splitter.
 
 ### Task Splitter Agent
 
-After plan approval, run the task-splitter agent:
+After plan-reviewer completes, run task-splitter automatically:
 ```
-"Split this approved plan into beads issues"
+"Split this plan into beads issues"
 ```
 
-The agent outputs `bd create` commands. Review them, then execute to create the issues.
+The agent outputs `bd create` commands. Then call ExitPlanMode so user can review everything together (plan + findings + commands).
 
 ### After Plan Approval
 
-When user approves a finished plan:
+When user approves (plan + findings + commands shown via ExitPlanMode):
 
-1. **Run task-splitter** → create beads issues from the plan
-2. **Land the plane**:
-   - Create branch if needed (e.g., `feat/<id>-slug`)
-   - `git push` (beads daemon auto-syncs separately)
-   - Verify clean git state
+1. **Execute bd create commands** → create beads issues
+2. **Stop and provide next session prompt** → user will `/clear` to free context
 
 This enables the next session to immediately start implementing from ready beads issues.
 
