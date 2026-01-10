@@ -24,7 +24,7 @@ Launch **five agents in parallel** using the Task tool:
 **Agent 1 - Code Review (kas):**
 ```
 "Run code review on the current git changes.
-Read agent instructions at /home/kas/dev/kas-cc-plugins/agents/code-reviewer.md
+Read agent instructions at agents/code-reviewer.md (relative to plugin root)
 Return structured findings with severity levels and overall assessment (APPROVED/NEEDS CHANGES/REJECTED)."
 ```
 
@@ -73,7 +73,7 @@ Launch **one agent**:
 **Agent 6 - Reality Assessment (kas):**
 ```
 "Run reality assessment on the current git changes.
-Read agent instructions at /home/kas/dev/kas-cc-plugins/agents/project-reality-manager.md
+Read agent instructions at agents/project-reality-manager.md (relative to plugin root)
 Return gap analysis and functional state assessment."
 ```
 

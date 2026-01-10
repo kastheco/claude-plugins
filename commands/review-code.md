@@ -19,7 +19,7 @@ If no changes, report "Nothing to review" and stop.
 
 ### 2. Read agent instructions
 
-Read `/home/kas/dev/kas-cc-plugins/agents/code-reviewer.md` and apply the review philosophy, checklist, and output format defined there.
+Read `agents/code-reviewer.md` (relative to plugin root) and apply the review philosophy, checklist, and output format defined there.
 
 ### 3. Execute review
 

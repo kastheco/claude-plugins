@@ -19,7 +19,7 @@ If no changes, report "Nothing to assess" and stop.
 
 ### 2. Read agent instructions
 
-Read `/home/kas/dev/kas-cc-plugins/agents/project-reality-manager.md` and apply the reality assessment approach defined there.
+Read `agents/project-reality-manager.md` (relative to plugin root) and apply the reality assessment approach defined there.
 
 ### 3. Execute assessment
 
