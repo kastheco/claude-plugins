@@ -163,7 +163,61 @@ fi
 
 ### 3. Check Daemon Status
 
-*Implemented in kas-plugins-x1z*
+Daemon issues are **WARNINGS** - setup can continue but sync won't work automatically.
+
+```bash
+# Sync before any daemon changes (protect in-flight data)
+bd sync 2>/dev/null || true
+
+# Check daemon status (use deprecated flag for parseable format)
+DAEMON_STATUS=$(bd daemon --status 2>&1)
+
+if echo "$DAEMON_STATUS" | grep -q "Daemon is running"; then
+  # Daemon running - check flags
+  HAS_COMMIT=$(echo "$DAEMON_STATUS" | grep -q "Auto-Commit: true" && echo "yes" || echo "no")
+  HAS_PUSH=$(echo "$DAEMON_STATUS" | grep -q "Auto-Push: true" && echo "yes" || echo "no")
+  DAEMON_PID=$(echo "$DAEMON_STATUS" | grep -oP 'PID \K\d+')
+
+  if [[ "$HAS_COMMIT" == "yes" && "$HAS_PUSH" == "yes" ]]; then
+    echo "[PASS] Daemon running (PID $DAEMON_PID) with auto-commit and auto-push"
+  else
+    echo "[WARN] Daemon running but missing flags (commit=$HAS_COMMIT, push=$HAS_PUSH)"
+    echo "  Restarting daemon with correct flags..."
+
+    # Capture state for rollback
+    OLD_PID=$DAEMON_PID
+
+    # Stop and restart
+    bd daemon --stop 2>/dev/null || true
+    sleep 0.5
+
+    if bd daemon --start --auto-commit --auto-push 2>/dev/null; then
+      NEW_STATUS=$(bd daemon --status 2>&1)
+      NEW_PID=$(echo "$NEW_STATUS" | grep -oP 'PID \K\d+')
+      echo "[PASS] Daemon restarted (PID $NEW_PID) with correct flags"
+    else
+      echo "[WARN] Daemon restart failed"
+      echo "  Check: $BEADS_DIR/daemon.log"
+      echo "  Manual fix: bd daemon --start --auto-commit --auto-push"
+      # WARN - continue but note the issue
+    fi
+  fi
+else
+  # Daemon not running - start it
+  echo "[INFO] Daemon not running, starting..."
+
+  if bd daemon --start --auto-commit --auto-push 2>/dev/null; then
+    NEW_STATUS=$(bd daemon --status 2>&1)
+    NEW_PID=$(echo "$NEW_STATUS" | grep -oP 'PID \K\d+')
+    echo "[PASS] Daemon started (PID $NEW_PID) with auto-commit and auto-push"
+  else
+    echo "[WARN] Could not start daemon"
+    echo "  Check: $BEADS_DIR/daemon.log"
+    echo "  Manual fix: bd daemon --start --auto-commit --auto-push"
+    # WARN - continue but note the issue
+  fi
+fi
+```
 
 ### 4. Check Remote and Sync Branch
 
