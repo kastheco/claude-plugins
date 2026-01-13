@@ -22,7 +22,7 @@ if ! command -v bd &>/dev/null; then
 fi
 
 # Check version >= 0.5.0
-BD_VERSION=$(bd --version 2>/dev/null | grep -oP '\d+\.\d+\.\d+' | head -1)
+BD_VERSION=$(bd --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
 if [[ -z "$BD_VERSION" ]]; then
   echo "[FAIL] Could not determine bd version"
   # BLOCKER
@@ -31,7 +31,9 @@ fi
 # Compare versions (0.5.0 minimum)
 BD_MAJOR=$(echo "$BD_VERSION" | cut -d. -f1)
 BD_MINOR=$(echo "$BD_VERSION" | cut -d. -f2)
-if [[ "$BD_MAJOR" -lt 1 && "$BD_MINOR" -lt 5 ]]; then
+BD_MAJOR=${BD_MAJOR:-0}
+BD_MINOR=${BD_MINOR:-0}
+if [[ "$BD_MAJOR" -eq 0 && "$BD_MINOR" -lt 5 ]]; then
   echo "[FAIL] bd version $BD_VERSION < 0.5.0"
   echo "  Upgrade: cargo install beads --force"
   # BLOCKER
@@ -51,8 +53,9 @@ if ! command -v gh &>/dev/null; then
 fi
 
 # Check version >= 2.0.0
-GH_VERSION=$(gh --version 2>/dev/null | grep -oP '\d+\.\d+\.\d+' | head -1)
+GH_VERSION=$(gh --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
 GH_MAJOR=$(echo "$GH_VERSION" | cut -d. -f1)
+GH_MAJOR=${GH_MAJOR:-0}
 if [[ "$GH_MAJOR" -lt 2 ]]; then
   echo "[FAIL] gh version $GH_VERSION < 2.0.0"
   echo "  Upgrade: https://cli.github.com/"
@@ -81,9 +84,11 @@ fi
 
 ```bash
 # Check version >= 2.20.0
-GIT_VERSION=$(git --version 2>/dev/null | grep -oP '\d+\.\d+\.\d+' | head -1)
+GIT_VERSION=$(git --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
 GIT_MAJOR=$(echo "$GIT_VERSION" | cut -d. -f1)
 GIT_MINOR=$(echo "$GIT_VERSION" | cut -d. -f2)
+GIT_MAJOR=${GIT_MAJOR:-0}
+GIT_MINOR=${GIT_MINOR:-0}
 if [[ "$GIT_MAJOR" -lt 2 ]] || [[ "$GIT_MAJOR" -eq 2 && "$GIT_MINOR" -lt 20 ]]; then
   echo "[FAIL] git version $GIT_VERSION < 2.20.0"
   # BLOCKER
@@ -150,11 +155,11 @@ fi
 # Check .gitignore excludes local files
 GITIGNORE="$REPO_ROOT/.gitignore"
 if [[ -f "$GITIGNORE" ]]; then
-  if ! grep -q "\.beads/\*\.db" "$GITIGNORE" 2>/dev/null; then
+  if ! grep -Fq '.beads/*.db' "$GITIGNORE" 2>/dev/null; then
     echo "[WARN] .gitignore missing: .beads/*.db"
     echo "  Add to prevent committing local database"
   fi
-  if ! grep -q "\.beads/\*\.log" "$GITIGNORE" 2>/dev/null; then
+  if ! grep -Fq '.beads/*.log' "$GITIGNORE" 2>/dev/null; then
     echo "[WARN] .gitignore missing: .beads/*.log"
     echo "  Add to prevent committing daemon logs"
   fi
@@ -167,7 +172,9 @@ Daemon issues are **WARNINGS** - setup can continue but sync won't work automati
 
 ```bash
 # Sync before any daemon changes (protect in-flight data)
-bd sync 2>/dev/null || true
+if ! bd sync 2>&1; then
+  echo "[WARN] Pre-restart sync failed - changes may not be saved"
+fi
 
 # Check daemon status (use deprecated flag for parseable format)
 DAEMON_STATUS=$(bd daemon --status 2>&1)
@@ -176,7 +183,7 @@ if echo "$DAEMON_STATUS" | grep -q "Daemon is running"; then
   # Daemon running - check flags
   HAS_COMMIT=$(echo "$DAEMON_STATUS" | grep -q "Auto-Commit: true" && echo "yes" || echo "no")
   HAS_PUSH=$(echo "$DAEMON_STATUS" | grep -q "Auto-Push: true" && echo "yes" || echo "no")
-  DAEMON_PID=$(echo "$DAEMON_STATUS" | grep -oP 'PID \K\d+')
+  DAEMON_PID=$(echo "$DAEMON_STATUS" | grep -oE 'PID [0-9]+' | grep -oE '[0-9]+')
 
   if [[ "$HAS_COMMIT" == "yes" && "$HAS_PUSH" == "yes" ]]; then
     echo "[PASS] Daemon running (PID $DAEMON_PID) with auto-commit and auto-push"
@@ -184,16 +191,13 @@ if echo "$DAEMON_STATUS" | grep -q "Daemon is running"; then
     echo "[WARN] Daemon running but missing flags (commit=$HAS_COMMIT, push=$HAS_PUSH)"
     echo "  Restarting daemon with correct flags..."
 
-    # Capture state for rollback
-    OLD_PID=$DAEMON_PID
-
     # Stop and restart
     bd daemon --stop 2>/dev/null || true
     sleep 0.5
 
     if bd daemon --start --auto-commit --auto-push 2>/dev/null; then
       NEW_STATUS=$(bd daemon --status 2>&1)
-      NEW_PID=$(echo "$NEW_STATUS" | grep -oP 'PID \K\d+')
+      NEW_PID=$(echo "$NEW_STATUS" | grep -oE 'PID [0-9]+' | grep -oE '[0-9]+')
       echo "[PASS] Daemon restarted (PID $NEW_PID) with correct flags"
     else
       echo "[WARN] Daemon restart failed"
@@ -208,7 +212,7 @@ else
 
   if bd daemon --start --auto-commit --auto-push 2>/dev/null; then
     NEW_STATUS=$(bd daemon --status 2>&1)
-    NEW_PID=$(echo "$NEW_STATUS" | grep -oP 'PID \K\d+')
+    NEW_PID=$(echo "$NEW_STATUS" | grep -oE 'PID [0-9]+' | grep -oE '[0-9]+')
     echo "[PASS] Daemon started (PID $NEW_PID) with auto-commit and auto-push"
   else
     echo "[WARN] Could not start daemon"
@@ -233,10 +237,11 @@ if [[ -z "$ORIGIN_URL" ]]; then
 fi
 
 # Test push access with dry-run
-if ! git push --dry-run origin HEAD 2>/dev/null; then
+PUSH_ERR=$(git push --dry-run origin HEAD 2>&1)
+if [[ $? -ne 0 ]]; then
   echo "[FAIL] Cannot push to origin"
+  echo "  Error: $PUSH_ERR"
   echo "  Check SSH keys or HTTPS credentials"
-  echo "  Test: git push --dry-run origin HEAD"
   # BLOCKER
 fi
 
@@ -247,11 +252,9 @@ if git ls-remote --heads origin "$SYNC_BRANCH" 2>/dev/null | grep -q "$SYNC_BRAN
 else
   echo "[INFO] Creating remote sync branch: $SYNC_BRANCH"
 
-  # Create orphan branch for beads sync
-  CURRENT_BRANCH=$(git branch --show-current)
-
   # Create and push the branch
-  if git push origin HEAD:refs/heads/$SYNC_BRANCH 2>/dev/null; then
+  BRANCH_ERR=$(git push origin HEAD:refs/heads/$SYNC_BRANCH 2>&1)
+  if [[ $? -eq 0 ]]; then
     # Verify it was created
     if git ls-remote --heads origin "$SYNC_BRANCH" 2>/dev/null | grep -q "$SYNC_BRANCH"; then
       echo "[PASS] Created remote sync branch: $SYNC_BRANCH"
@@ -262,7 +265,7 @@ else
     fi
   else
     echo "[FAIL] Could not create sync branch"
-    echo "  Manual fix: git push origin HEAD:refs/heads/$SYNC_BRANCH"
+    echo "  Error: $BRANCH_ERR"
     # BLOCKER
   fi
 fi
@@ -284,15 +287,27 @@ if [[ ! -f "$SETTINGS_FILE" ]]; then
   # echo '{"enabledPlugins":{"kas@kas-claude-plugin":true}}' > "$SETTINGS_FILE"
   # WARN - continue but note the issue
 else
-  # Check if kas plugin is enabled
-  if grep -q '"kas@kas-claude-plugin"' "$SETTINGS_FILE" && grep -q 'true' "$SETTINGS_FILE"; then
-    echo "[PASS] kas plugin enabled"
+  # Check if kas plugin is enabled (use jq if available, fallback to grep)
+  if command -v jq &>/dev/null; then
+    ENABLED=$(jq -r '.enabledPlugins["kas@kas-claude-plugin"] // false' "$SETTINGS_FILE" 2>/dev/null)
+    if [[ "$ENABLED" == "true" ]]; then
+      echo "[PASS] kas plugin enabled"
+    else
+      echo "[WARN] kas plugin not enabled in settings.json"
+      echo "  Hooks won't auto-run on session start"
+      echo "  Enable plugin? (prompt user)"
+      # WARN - continue but note the issue
+    fi
   else
-    echo "[WARN] kas plugin not enabled in settings.json"
-    echo "  Hooks won't auto-run on session start"
-    echo "  Enable plugin? (prompt user)"
-    # If user confirms, add to enabledPlugins
-    # WARN - continue but note the issue
+    # Fallback: check for pattern on same/adjacent lines
+    if grep -q '"kas@kas-claude-plugin"[[:space:]]*:[[:space:]]*true' "$SETTINGS_FILE"; then
+      echo "[PASS] kas plugin enabled"
+    else
+      echo "[WARN] kas plugin not enabled in settings.json"
+      echo "  Hooks won't auto-run on session start"
+      echo "  Enable plugin? (prompt user)"
+      # WARN - continue but note the issue
+    fi
   fi
 fi
 
