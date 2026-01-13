@@ -112,7 +112,54 @@ fi
 
 ### 2. Check Beads Directory
 
-*Implemented in kas-plugins-26z*
+Detect worktree context and verify beads is initialized.
+
+```bash
+# Detect if in worktree
+GIT_COMMON_DIR=$(git rev-parse --git-common-dir 2>/dev/null)
+GIT_TOPLEVEL=$(git rev-parse --show-toplevel 2>/dev/null)
+
+if [[ "$GIT_COMMON_DIR" != ".git" && "$GIT_COMMON_DIR" != "$GIT_TOPLEVEL/.git" ]]; then
+  # In worktree - use parent repo's .beads/
+  REPO_ROOT=$(dirname "$GIT_COMMON_DIR")
+  BEADS_DIR="$REPO_ROOT/.beads"
+  echo "[INFO] Worktree detected, using parent repo: $REPO_ROOT"
+else
+  # In main repo
+  REPO_ROOT="$GIT_TOPLEVEL"
+  BEADS_DIR="$REPO_ROOT/.beads"
+fi
+
+# Check if .beads/ exists
+if [[ ! -d "$BEADS_DIR" ]]; then
+  echo "[FAIL] Beads not initialized at $BEADS_DIR"
+  echo "  Initialize? Run: bd init"
+  # Prompt user - if they confirm, run bd init
+  # If declined, this is a BLOCKER
+fi
+
+# Validate with smoke test
+if ! bd list --status=open &>/dev/null; then
+  echo "[FAIL] Beads database invalid or corrupted"
+  echo "  Try: rm -rf $BEADS_DIR && bd init"
+  # BLOCKER
+else
+  echo "[PASS] Beads initialized at $BEADS_DIR"
+fi
+
+# Check .gitignore excludes local files
+GITIGNORE="$REPO_ROOT/.gitignore"
+if [[ -f "$GITIGNORE" ]]; then
+  if ! grep -q "\.beads/\*\.db" "$GITIGNORE" 2>/dev/null; then
+    echo "[WARN] .gitignore missing: .beads/*.db"
+    echo "  Add to prevent committing local database"
+  fi
+  if ! grep -q "\.beads/\*\.log" "$GITIGNORE" 2>/dev/null; then
+    echo "[WARN] .gitignore missing: .beads/*.log"
+    echo "  Add to prevent committing daemon logs"
+  fi
+fi
+```
 
 ### 3. Check Daemon Status
 
