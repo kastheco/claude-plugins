@@ -1,0 +1,12 @@
+{
+  "name": "clickup-tasks",
+  "description": "ClickUp task management with kas workflow integration",
+  "version": "0.1.0",
+  "author": {
+    "name": "Kas",
+    "url": "https://github.com/brkastner"
+  },
+  "repository": "https://github.com/brkastner/kas-claude-plugin",
+  "license": "MIT",
+  "keywords": ["clickup", "tasks", "workflow", "project-management"]
+}
