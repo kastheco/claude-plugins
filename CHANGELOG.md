@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0] - 2026-01-21
+
+### Added
+- **New plugin: `task` v1.0.0** - ClickUp task management with kas workflow integration
+  - 5 commands: `/task:start`, `/task:done`, `/task:merge`, `/task:status`, `/task:new`
+  - `clickup-task-agent` for MCP delegation (keeps main context clean)
+  - `task-workflow` skill with setup, prompts, and templates
+  - ClickUp HTTP MCP server configuration
+
+### Fixed
+- Removed redundant root `plugin.json` (marketplace repos only need `marketplace.json`)
+- Corrected repository references to `kas-claude-plugins` (plural)
+
 ## [1.8.0] - 2026-01-16
 
 ### Added
