@@ -37,7 +37,7 @@ Create a new ClickUp task through an interview flow.
 
 3. **Create task via clickup-task-agent**:
    ```
-   Use Task tool with subagent_type="clickup-tasks:clickup-task-agent":
+   Use Task tool with subagent_type="task:clickup-task-agent":
 
    "Create ClickUp task:
    - Name: {task_name}

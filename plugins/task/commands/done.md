@@ -31,7 +31,7 @@ Complete work on current ClickUp task: verify, commit, push, create PR, update C
 
 5. **Update ClickUp via clickup-task-agent**:
    ```
-   Use Task tool with subagent_type="clickup-tasks:clickup-task-agent":
+   Use Task tool with subagent_type="task:clickup-task-agent":
 
    "Mark task CU-{id} ready for review:
    1. Update status to 'ready for review'

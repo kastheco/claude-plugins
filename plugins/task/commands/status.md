@@ -21,7 +21,7 @@ Check status of a ClickUp task.
 
 3. **Fetch status via clickup-task-agent**:
    ```
-   Use Task tool with subagent_type="clickup-tasks:clickup-task-agent":
+   Use Task tool with subagent_type="task:clickup-task-agent":
 
    "Check status of CU-{id}:
    Return: name, status, assignee, due date, last updated"

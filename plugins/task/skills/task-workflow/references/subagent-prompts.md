@@ -7,7 +7,7 @@ Copy-paste these prompts when spawning the clickup-task-agent. Replace placehold
 ## Fetch Task Details
 
 ```
-Task tool with subagent_type="clickup-tasks:clickup-task-agent":
+Task tool with subagent_type="task:clickup-task-agent":
 
 "Fetch ClickUp task CU-{TASK_ID}:
 1. Get task details (clickup_get_task)
@@ -33,7 +33,7 @@ Return ONLY:
 ## Create New Task
 
 ```
-Task tool with subagent_type="clickup-tasks:clickup-task-agent":
+Task tool with subagent_type="task:clickup-task-agent":
 
 "Create ClickUp task:
 1. Call clickup_create_task with:
@@ -52,7 +52,7 @@ Return ONLY:
 ## Mark Ready for Review
 
 ```
-Task tool with subagent_type="clickup-tasks:clickup-task-agent":
+Task tool with subagent_type="task:clickup-task-agent":
 
 "Mark task CU-{TASK_ID} ready for review:
 1. Update status to 'ready for review' (clickup_update_task)
@@ -71,7 +71,7 @@ Return ONLY:
 ## Mark Complete
 
 ```
-Task tool with subagent_type="clickup-tasks:clickup-task-agent":
+Task tool with subagent_type="task:clickup-task-agent":
 
 "Mark task CU-{TASK_ID} complete:
 1. Update status to 'complete' (clickup_update_task)
@@ -85,7 +85,7 @@ Return ONLY:
 ## Check Status
 
 ```
-Task tool with subagent_type="clickup-tasks:clickup-task-agent":
+Task tool with subagent_type="task:clickup-task-agent":
 
 "Check status of CU-{TASK_ID}:
 1. Get task details (clickup_get_task)
@@ -103,7 +103,7 @@ Return ONLY:
 ## Add Comment
 
 ```
-Task tool with subagent_type="clickup-tasks:clickup-task-agent":
+Task tool with subagent_type="task:clickup-task-agent":
 
 "Add comment to CU-{TASK_ID}:
 1. Call clickup_create_task_comment with:

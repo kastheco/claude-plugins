@@ -19,7 +19,7 @@ Merge PR and mark ClickUp task complete.
 
 3. **On kas:merge success, update ClickUp via clickup-task-agent**:
    ```
-   Use Task tool with subagent_type="clickup-tasks:clickup-task-agent":
+   Use Task tool with subagent_type="task:clickup-task-agent":
 
    "Mark task CU-{id} complete:
    1. Update status to 'complete'"

@@ -1,4 +1,4 @@
-# clickup-tasks
+# task
 
 ClickUp task management with kas workflow integration.
 
@@ -19,7 +19,7 @@ Add to your project's `.claude/settings.json`:
 
 ```json
 {
-  "plugins": ["kas-claude-plugin/clickup-tasks"]
+  "plugins": ["kas-claude-plugin/task"]
 }
 ```
 
@@ -113,7 +113,7 @@ Create a new ClickUp task.
 ## Architecture
 
 ```
-User Command → clickup-tasks plugin
+User Command → task plugin
                     ↓
               clickup-task-agent (subagent)
                     ↓

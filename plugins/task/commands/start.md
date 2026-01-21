@@ -16,7 +16,7 @@ Start work on ClickUp task.
 
 2. **Fetch task via clickup-task-agent**:
    ```
-   Use Task tool with subagent_type="clickup-tasks:clickup-task-agent":
+   Use Task tool with subagent_type="task:clickup-task-agent":
 
    "Fetch ClickUp task CU-{id}:
    1. Get task details (name, description, acceptance criteria)

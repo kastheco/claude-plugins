@@ -1,6 +1,6 @@
 ---
 name: ClickUp Task Workflow
-description: This skill should be used when the user mentions "ClickUp task", "CU-xxx", "task workflow", "clickup integration", or when working with clickup-tasks plugin commands (/task:start, /task:done, /task:merge, /task:status, /task:new). Provides workflow patterns for ClickUp task management integrated with kas.
+description: This skill should be used when the user mentions "ClickUp task", "CU-xxx", "task workflow", "clickup integration", or when working with task plugin commands (/task:start, /task:done, /task:merge, /task:status, /task:new). Provides workflow patterns for ClickUp task management integrated with kas.
 version: 0.1.0
 ---
 
@@ -43,7 +43,7 @@ Activate this skill when detecting:
 When needing ClickUp data, spawn the clickup-task-agent:
 
 ```
-Task tool with subagent_type="clickup-tasks:clickup-task-agent":
+Task tool with subagent_type="task:clickup-task-agent":
 
 "[Operation description]
 1. [MCP tool call 1]

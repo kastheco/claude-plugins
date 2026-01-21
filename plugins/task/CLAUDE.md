@@ -1,4 +1,4 @@
-# clickup-tasks Plugin Instructions
+# task Plugin Instructions
 
 ## Core Principle
 
@@ -21,7 +21,7 @@ All ClickUp API operations must be delegated to the `clickup-task-agent` subagen
 When you need ClickUp data, spawn the agent:
 
 ```
-Task tool with subagent_type="clickup-tasks:clickup-task-agent":
+Task tool with subagent_type="task:clickup-task-agent":
 "[Operation]: [specific instructions]
 Return ONLY: [concise format]"
 ```

@@ -4,7 +4,7 @@ This guide walks through obtaining credentials for the ClickUp MCP integration.
 
 ## Prerequisites
 
-The clickup-tasks plugin uses the ClickUp HTTP MCP server at `https://mcp.clickup.com/mcp`. Authentication is handled via OAuth when you first use the MCP tools.
+The task plugin uses the ClickUp HTTP MCP server at `https://mcp.clickup.com/mcp`. Authentication is handled via OAuth when you first use the MCP tools.
 
 ## Quick Start
 
