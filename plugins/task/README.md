@@ -13,13 +13,13 @@ This plugin wraps kas workflow commands with ClickUp task synchronization. All C
 
 ## Installation
 
-This plugin is part of the [kas-claude-plugin](https://github.com/brkastner/kas-claude-plugin) marketplace.
+This plugin is part of the [kas-claude-plugins](https://github.com/brkastner/kas-claude-plugins) marketplace.
 
 Add to your project's `.claude/settings.json`:
 
 ```json
 {
-  "plugins": ["kas-claude-plugin/task"]
+  "plugins": ["kas-claude-plugins/task"]
 }
 ```
 

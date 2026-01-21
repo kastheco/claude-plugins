@@ -6,7 +6,7 @@
     "name": "Kas",
     "url": "https://github.com/brkastner"
   },
-  "repository": "https://github.com/brkastner/kas-claude-plugin",
+  "repository": "https://github.com/brkastner/kas-claude-plugins",
   "license": "MIT",
   "keywords": ["clickup", "tasks", "workflow", "project-management"]
 }
