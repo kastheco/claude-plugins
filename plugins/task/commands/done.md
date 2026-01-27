@@ -6,6 +6,10 @@ description: Complete work and create PR for ClickUp task
 
 Complete work on current ClickUp task: verify, commit, push, create PR, update ClickUp.
 
+## Integration with Superpowers
+
+If implementation used `superpowers:subagent-driven-development`, that skill ends with `superpowers:finishing-a-development-branch`. When user selects PR option, this command handles ClickUp integration.
+
 ## Workflow
 
 1. **Detect current task**:
@@ -46,7 +50,12 @@ Complete work on current ClickUp task: verify, commit, push, create PR, update C
 - If PR creation fails: Stop, do NOT update ClickUp
 - If ClickUp update fails after success: Warn user, show manual command
 
+6. **Cleanup session file**:
+   - Check for `.claude/task-session.json` and delete if exists
+   - Only cleaned up AFTER successful completion (preserves recovery context on failure)
+
 ## Notes
 
 - This command ensures all quality gates pass before marking ready for review
 - ClickUp is only updated if ALL prior steps succeed
+- Session file cleanup happens last to preserve recovery context on partial failures

@@ -18,13 +18,25 @@ All ClickUp operations delegate to the `clickup-task-agent` subagent which retur
 
 ## Command Mapping
 
-| /task Command | kas Command(s) | ClickUp Actions |
-|---------------|----------------|-----------------|
-| `/task:start CU-xxx` | `/kas:start` | Fetch task, set "in progress", assign |
+| /task Command | Skills/Commands Used | ClickUp Actions |
+|---------------|----------------------|-----------------|
+| `/task:start CU-xxx` | `superpowers:brainstorming` → `kas:review-plan` (loop) → `superpowers:subagent-driven-development` OR `superpowers:executing-plans` | Fetch task, set "in progress", assign |
 | `/task:done` | `/kas:verify` → `/kas:done` → PR | Set "ready for review", comment PR |
 | `/task:merge` | `/kas:merge` | Set "complete" |
 | `/task:status [id]` | None | Fetch and display status |
 | `/task:new` | None | Create task via interview |
+
+## Planning Workflow
+
+`/task:start` uses superpowers-driven planning:
+
+1. **Fetch task** via clickup-task-agent (capture original status for rollback)
+2. **Enter plan mode** using EnterPlanMode tool
+3. **Brainstorming** via `superpowers:brainstorming` - explores, asks questions, outputs design
+4. **Review loop** via `kas:review-plan` - max 5 iterations until APPROVED or user overrides/aborts
+5. **Implementation** via user choice:
+   - Option 1: `superpowers:subagent-driven-development` (same session)
+   - Option 2: `superpowers:executing-plans` (separate session with worktree)
 
 ## Detection Triggers
 

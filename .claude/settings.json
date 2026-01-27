@@ -1,5 +1,6 @@
 {
   "enabledPlugins": {
-    "kas@kas-claude-plugins": true
+    "kas@kas-claude-plugins": true,
+    "superpowers@superpowers-marketplace": true
   }
 }

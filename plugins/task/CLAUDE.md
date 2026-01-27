@@ -10,7 +10,7 @@ All ClickUp API operations must be delegated to the `clickup-task-agent` subagen
 
 | Command | Purpose | Wraps |
 |---------|---------|-------|
-| `/task:start <id>` | Start work on ClickUp task | kas:start |
+| `/task:start <id>` | Start work on ClickUp task | superpowers:brainstorming → kas:review-plan → implementation |
 | `/task:done` | Complete work, create PR, update ClickUp | kas:verify → kas:done |
 | `/task:merge` | Merge PR, close ClickUp task | kas:merge |
 | `/task:status [id]` | Check task status | (ClickUp only) |
@@ -40,8 +40,36 @@ ClickUp MCP server uses OAuth - authenticate when prompted on first use.
 
 For manual API token setup, see `skills/task-workflow/references/setup.md`.
 
+## Superpowers Integration
+
+This plugin uses superpowers skills for planning and implementation.
+
+### Planning Phase
+
+| Skill | Purpose |
+|-------|---------|
+| `superpowers:brainstorming` | Explore context, ideate, create design doc |
+| `kas:review-plan` | Review design for gaps (loops until approved) |
+
+### Implementation Phase
+
+| Skill | When to Use |
+|-------|-------------|
+| `superpowers:subagent-driven-development` | Same session, small-medium tasks |
+| `superpowers:using-git-worktrees` | Creates worktree for separate session |
+| `superpowers:executing-plans` | Used in NEW session after worktree creation |
+
+**Note:** For separate session (Option 2), workflow is: `using-git-worktrees` → save session file → user runs `/clear` → user invokes `executing-plans` in new session.
+
+### Skill Invocation
+
+```
+Skill tool with skill="superpowers:brainstorming"
+```
+
 ## Dependencies
 
 This plugin requires:
-- `kas` plugin (workflow commands)
+- `kas` plugin (review-plan, verify, done, merge)
+- `superpowers` plugin (brainstorming, subagent-driven-development, etc.)
 - ClickUp MCP server (configured in `.mcp.json`)
