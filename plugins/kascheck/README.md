@@ -1,4 +1,4 @@
-# project-auditor
+# kascheck
 
 Production-readiness audit for projects — especially vibe-coded / AI-generated codebases. Scores security, code quality, infrastructure, and testing, then surfaces severity-tagged findings and remediation effort estimates.
 
@@ -15,12 +15,12 @@ Produces a scored report (0-100) with verdict tiers: **READY**, **READY WITH FOL
 
 ## Installation
 
-Part of the [kas-claude-plugins](https://github.com/brkastner/kas-claude-plugins) marketplace.
+Part of the [kas-claude-plugins](https://github.com/kastheco/claude-plugins) marketplace.
 
 ```json
 {
   "enabledPlugins": {
-    "project-auditor@kas-claude-plugins": true
+    "kascheck@kas-claude-plugins": true
   }
 }
 ```
@@ -29,16 +29,16 @@ Part of the [kas-claude-plugins](https://github.com/brkastner/kas-claude-plugins
 
 ```bash
 # Audit current directory
-/project-auditor:audit
+/kascheck:audit
 
 # Audit a specific path
-/project-auditor:audit /path/to/project
+/kascheck:audit /path/to/project
 
 # Detailed audit with file-level findings
-/project-auditor:audit /path/to/project --detailed
+/kascheck:audit /path/to/project --detailed
 ```
 
-The skill is also auto-invocable — saying "audit this project" or "run a production-readiness check" will trigger it.
+The skill is also auto-invocable — saying "audit this project", "kascheck this", or "run a production-readiness check" will trigger it.
 
 ## Scoring
 
@@ -58,4 +58,4 @@ Score starts at 100. Per-finding deductions are capped per severity class so a p
 | 50-69 | NEEDS WORK |
 | 0-49 | NOT RECOMMENDED |
 
-See `skills/project-auditor/SKILL.md` for full audit phases and `references/` for the detailed checklists used by the subagents.
+See `skills/kascheck/SKILL.md` for full audit phases and `references/` for the detailed checklists used by the subagents.

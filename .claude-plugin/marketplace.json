@@ -21,10 +21,10 @@
       "category": "integrations"
     },
     {
-      "name": "project-auditor",
+      "name": "kascheck",
       "description": "Production-readiness audit for projects (especially vibe-coded). Scores security, code quality, infrastructure, testing.",
       "version": "1.0.0",
-      "source": "./plugins/project-auditor",
+      "source": "./plugins/kascheck",
       "category": "code-review"
     }
   ]

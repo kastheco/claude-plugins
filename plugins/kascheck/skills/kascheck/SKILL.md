@@ -1,16 +1,16 @@
 ---
-name: Project Auditor
-description: Use when the user asks for a production-readiness audit, project audit, or runs /project-auditor:audit. Spawns parallel subagents to assess security, code quality, infrastructure, and testing, then produces a scored report with severity-tagged findings and remediation effort estimates. Especially useful for vibe-coded/AI-generated projects.
+name: Kascheck
+description: Use when the user asks for a production-readiness audit, project audit, kascheck, or runs /kascheck:audit. Spawns parallel subagents to assess security, code quality, infrastructure, and testing, then produces a scored report with severity-tagged findings and remediation effort estimates. Especially useful for vibe-coded/AI-generated projects.
 version: 1.0.0
 ---
 
-# Project Auditor Skill
+# Kascheck
 
 Analyze projects (especially vibe-coded/AI-generated) to assess production readiness and identify required remediation work.
 
 ## Slash Command
 
-**`/project-auditor:audit [path] [--detailed]`**
+**`/kascheck:audit [path] [--detailed]`**
 
 - `path`: Local directory path to analyze (defaults to current directory)
 - `--detailed`: Include specific file paths, code examples, and remediation steps
@@ -30,7 +30,7 @@ The audit produces a comprehensive report with three views:
 Spawn an Explore agent to understand the project:
 
 ```
-Task("Project Auditor: Discover project structure
+Task("Kascheck: Discover project structure
 
 Analyze this project to understand:
 1. Technology stack (languages, frameworks, databases)
@@ -53,7 +53,7 @@ Path: {target_path}", subagent_type="Explore")
 ### Phase 2: Security Audit (Subagent)
 
 ```
-Task("Project Auditor: Security assessment
+Task("Kascheck: Security assessment
 
 Analyze security practices in this {framework} project at {target_path}:
 
@@ -101,7 +101,7 @@ Return findings with severity (CRITICAL/HIGH/MEDIUM/LOW) and specific file locat
 ### Phase 3: Code Quality Audit (Subagent)
 
 ```
-Task("Project Auditor: Code quality assessment
+Task("Kascheck: Code quality assessment
 
 Analyze code quality in this {framework} project at {target_path}:
 
@@ -152,7 +152,7 @@ Return findings with effort estimate (QUICK_FIX/MODERATE/SIGNIFICANT).", subagen
 ### Phase 4: Infrastructure Audit (Subagent)
 
 ```
-Task("Project Auditor: Infrastructure assessment
+Task("Kascheck: Infrastructure assessment
 
 Analyze infrastructure and deployment readiness at {target_path}:
 

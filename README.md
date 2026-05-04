@@ -8,7 +8,7 @@ A marketplace of Claude Code plugins for workflow automation, task tracking, and
 |--------|-------------|---------|
 | [kas](./plugins/kas/) | Workflow automation with session management and code review | 2.0.0 |
 | [task](./plugins/task/) | ClickUp task management with kas workflow integration | 2.0.0 |
-| [project-auditor](./plugins/project-auditor/) | Production-readiness audit (security, code quality, infrastructure, testing) | 1.0.0 |
+| [kascheck](./plugins/kascheck/) | Production-readiness audit (security, code quality, infrastructure, testing) | 1.0.0 |
 
 ## Installation
 
@@ -45,7 +45,7 @@ Each plugin has its own README with detailed usage instructions:
 
 - [kas plugin](./plugins/kas/README.md) - Workflow automation with sessions and code review
 - [task plugin](./plugins/task/README.md) - ClickUp task management
-- [project-auditor plugin](./plugins/project-auditor/README.md) - Production-readiness audits
+- [kascheck plugin](./plugins/kascheck/README.md) - Production-readiness audits
 
 ## Contributing
 
