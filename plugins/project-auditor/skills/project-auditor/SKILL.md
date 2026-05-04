@@ -1,10 +1,16 @@
+---
+name: Project Auditor
+description: Use when the user asks for a production-readiness audit, project audit, or runs /project-auditor:audit. Spawns parallel subagents to assess security, code quality, infrastructure, and testing, then produces a scored report with severity-tagged findings and remediation effort estimates. Especially useful for vibe-coded/AI-generated projects.
+version: 1.0.0
+---
+
 # Project Auditor Skill
 
 Analyze projects (especially vibe-coded/AI-generated) to assess production readiness and identify required remediation work.
 
 ## Slash Command
 
-**`/audit [path] [--detailed]`**
+**`/project-auditor:audit [path] [--detailed]`**
 
 - `path`: Local directory path to analyze (defaults to current directory)
 - `--detailed`: Include specific file paths, code examples, and remediation steps
@@ -275,22 +281,32 @@ After all subagents complete, compile the final report:
 
 ## Scoring Methodology
 
-**Overall Score (0-100):**
-- Security: 40 points max
-- Code Quality: 25 points max
-- Infrastructure: 20 points max
-- Testing: 15 points max
+Score starts at 100 and deducts per-finding, with a per-severity class cap so no single severity can compound beyond its share. LOW findings are polish/nitpicks and must not dominate an otherwise-green project.
 
-**Deductions:**
-- CRITICAL issue: -20 points each
-- HIGH issue: -10 points each
-- MEDIUM issue: -5 points each
-- LOW issue: -2 points each
+**Deductions (per finding, capped by severity class):**
+
+| Severity | Per-finding | Class cap | Rationale |
+|---|---|---|---|
+| CRITICAL | -20 | -60 | Each blocks deploy. 3+ is terminal. |
+| HIGH | -8 | -24 | Serious but not deploy-blocking. |
+| MEDIUM | -3 | -15 | Real debt, slow burn. |
+| LOW | -1 | -5 | Polish / nitpicks. Shouldn't compound. |
+
+Floor the final score at 0. No score ceiling adjustments — within each class cap, every finding counts equally.
 
 **Verdicts:**
-- 80-100: READY (deploy with monitoring)
-- 50-79: NEEDS WORK (address high/critical first)
-- 0-49: NOT RECOMMENDED (significant remediation needed)
+- **85-100: READY** (ship with monitoring)
+- **70-84: READY WITH FOLLOWUPS** (ship but schedule a hardening pass)
+- **50-69: NEEDS WORK** (address HIGH+ before deploy)
+- **0-49: NOT RECOMMENDED** (significant remediation needed)
+
+**Calibration principle:** The score should reflect ship-readiness, not a checklist tally. 0 CRITICAL + 0 HIGH + green tests + CI gate = at least READY WITH FOLLOWUPS (70+); an otherwise-green project shouldn't drop into NEEDS WORK purely from MED/LOW polish. The per-class caps enforce this.
+
+**Sanity-check examples:**
+- 0C / 0H / 0M / 0L → **100** (READY)
+- 0C / 0H / 2M / 8L → 100 − 6 − 5 = **89** (READY)
+- 0C / 2H / 5M / 5L → 100 − 16 − 15 − 5 = **64** (NEEDS WORK)
+- 3C / 6H / 5M / 5L → 100 − 60 − 24 − 15 − 5 = **0** (NOT RECOMMENDED)
 
 ## Framework-Specific Checks
 

@@ -28,7 +28,7 @@ This approach produces functional-looking code that often has:
 **Detection:**
 ```bash
 # Check if all imports exist
-npm ls --all 2>&1 | grep "UNMET"
+npm ls --all 2>&1 | rg "UNMET"
 pip check
 ```
 
@@ -410,35 +410,35 @@ Run these checks on suspected vibe-coded projects:
 ### Quick Scans
 ```bash
 # Find TODO/FIXME comments
-grep -r "TODO\|FIXME\|HACK\|XXX" --include="*.py" --include="*.ts" --include="*.js"
+rg "TODO\|FIXME\|HACK\|XXX" -g "*.py" -g "*.ts" -g "*.js"
 
 # Find empty functions
-grep -rn "pass$\|return$\|{}" --include="*.py"
+rg -n "pass$\|return$\|{}" -g "*.py"
 
 # Find unused imports (Python)
 ruff check --select F401 .
 
 # Find console.log/print statements
-grep -r "console.log\|print(" --include="*.py" --include="*.ts" --include="*.js"
+rg "console.log\|print(" -g "*.py" -g "*.ts" -g "*.js"
 
 # Find hardcoded URLs
-grep -rE "https?://[a-z0-9]" --include="*.py" --include="*.ts" --include="*.js" | grep -v test | grep -v node_modules
+rg -E "https?://[a-z0-9]" -g "*.py" -g "*.ts" -g "*.js" -g "!*test*" -g "!node_modules"
 
 # Find potential secrets
-grep -rE "(password|secret|key|token)\s*=\s*['\"][^'\"]+['\"]" --include="*.py" --include="*.ts" --include="*.js"
+rg -E "(password|secret|key|token)\s*=\s*['\"][^'\"]+['\"]" -g "*.py" -g "*.ts" -g "*.js"
 ```
 
 ### Structural Analysis
 ```bash
 # Count abstraction depth (Python)
-grep -r "class.*:" --include="*.py" | wc -l
+rg "class.*:" -g "*.py" --count-matches
 
 # Find factory patterns
-grep -r "Factory" --include="*.py" --include="*.ts"
+rg "Factory" -g "*.py" -g "*.ts"
 
 # Count try-catch ratio vs async operations
-grep -r "try:" --include="*.py" | wc -l
-grep -r "await " --include="*.py" | wc -l
+rg "try:" -g "*.py" --count-matches
+rg "await " -g "*.py" --count-matches
 ```
 
 ---

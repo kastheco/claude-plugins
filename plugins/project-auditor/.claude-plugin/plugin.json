@@ -1,0 +1,12 @@
+{
+  "name": "project-auditor",
+  "description": "Production-readiness audit for projects (especially vibe-coded/AI-generated). Scores security, code quality, infrastructure, and testing.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Kas",
+    "url": "https://github.com/brkastner"
+  },
+  "repository": "https://github.com/brkastner/kas-claude-plugins",
+  "license": "MIT",
+  "keywords": ["audit", "production-readiness", "security", "code-quality", "vibe-code"]
+}

@@ -9,7 +9,7 @@ Standards for assessing code quality, maintainability, and production readiness.
 | Check | Pass Criteria | How to Verify |
 |-------|---------------|---------------|
 | Strict mode enabled | `strict: true` in tsconfig.json | Read tsconfig.json |
-| No `any` types | No explicit `any` usage | `grep -r ": any" --include="*.ts"` |
+| No `any` types | No explicit `any` usage | `rg ": any" -g "*.ts"` |
 | Null safety | Proper optional chaining | Check for `?.` and `??` usage |
 | Return types declared | Functions have explicit return types | Look for `: ReturnType` on functions |
 | Props typed | React components have typed props | Check for `interface Props` or `type Props` |
